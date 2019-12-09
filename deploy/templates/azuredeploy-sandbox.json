@@ -209,6 +209,27 @@
                 "description": "The type of the solution"
             }
         },
+        "ResourceLocation": {
+            "type": "string",
+            "allowedValues": [
+                "Australia East",
+                "East US",
+                "East US 2",
+                "West US",
+                "West US 2",
+                "North Central US",
+                "South Central US",
+                "Southeast Asia",
+                "North Europe",
+                "West Europe",
+                "UK West",
+                "UK South"
+            ],
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "The location of the deployed resources."
+            }
+        },
         "IotCentralLocation": {
             "type": "string",
             "allowedValues": [
@@ -287,7 +308,7 @@
             "tags": {
                 "FhirServerSolution": "[parameters('solutionType')]"
             },
-            "location": "[resourceGroup().location]",
+            "location": "[parameters('ResourceLocation')]",
             "sku": {
                 "name": "[parameters('appServicePlanSku')]"
             },
@@ -394,7 +415,7 @@
                         "value": "[parameters('AppServicePlanSku')]"
                     },
                     "ResourceLocation": {
-                        "value": "[resourceGroup().location]"
+                        "value": "[parameters('ResourceLocation')]"
                     },
                     "FhirServiceUrl": {
                         "value": "[variables('fhirServiceUrl')]"
