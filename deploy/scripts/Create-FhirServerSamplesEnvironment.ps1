@@ -133,12 +133,12 @@ if ($PersistenceProvider -eq 'sql')
 }
 
 $githubRawBaseUrl = $SourceRepository.Replace("github.com","raw.githubusercontent.com").TrimEnd('/')
-# $sandboxTemplate = "${githubRawBaseUrl}/${SourceRevision}/deploy/templates/azuredeploy-sandbox.json"
+$sandboxTemplate = "${githubRawBaseUrl}/${SourceRevision}/deploy/templates/azuredeploy-sandbox.json"
 
 $dashboardJSTemplate = "${githubRawBaseUrl}/${SourceRevision}/deploy/templates/azuredeploy-fhirdashboard-js.json"
 
 $iomtGithubRawBaseUrl = $IomtSourceRepository.Replace("github.com","raw.githubusercontent.com").TrimEnd('/')
-$iomtConnectorTemplate = "${$iomtGithubRawBaseUrl}/${SourceRevision}/deploy/templates/default-azuredeploy.json"
+$iomtConnectorTemplate = "${iomtGithubRawBaseUrl}/${SourceRevision}/deploy/templates/default-azuredeploy.json"
 
 $tenantDomain = $tenantInfo.TenantDomain
 $aadAuthority = "https://login.microsoftonline.com/${tenantDomain}"
