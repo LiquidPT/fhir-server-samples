@@ -99,7 +99,7 @@
         "fhirApiLocation": {
             "type": "string",
             "allowedValues": [ "westus2", "northcentralus", "ukwest", "uksouth", "southeastasia", "australiaeast", "westeurope" ],
-            "defaultValue": "westus2",
+            "defaultValue": "northcentralus",
             "metadata": {
                 "description": "Location of Azure API for FHIR"
             }
@@ -458,7 +458,7 @@
                     "repositoryBranch": {
                         "value": "[parameters('fhirDashboardRepositoryBranch')]"
                     },
-                    "growthChartAppLaunchUrl": {
+                    "bpChartAppLaunchUrl": {
                         "value": "[concat('https://', variables('bpChartName'), variables('webAppSuffix'), '/launch.html')]"
                     }
                 },
