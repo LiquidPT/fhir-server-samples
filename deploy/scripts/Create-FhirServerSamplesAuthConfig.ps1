@@ -181,10 +181,8 @@ Set-FhirServerUserAppRoleAssignments -ApiAppId $application.AppId -UserPrincipal
 $dashboardJSName = "${EnvironmentName}dash"
 $dashboardJSUrl = "https://${dashboardJSName}.${WebAppSuffix}"
 $dashboardJSReplyUrl = "${dashboardJSUrl}/.auth/login/aad/callback"
-$growthChartName = "${EnvironmentName}growth"
-$growthChartUrl = "https://${growthChartName}.${WebAppSuffix}"
-$medicationsName = "${EnvironmentName}meds"
-$medicationsUrl = "https://${medicationsName}.${WebAppSuffix}"
+$bpChartName = "${EnvironmentName}bp"
+$bpChartUrl = "https://${bpChartName}.${WebAppSuffix}"
 
 $confidentialClientAppName = "${EnvironmentName}-confidential-client"
 $confidentialClient = Get-AzureAdApplication -Filter "DisplayName eq '$confidentialClientAppName'"
@@ -245,10 +243,7 @@ if (!$publicClient) {
 } 
 
 Set-FhirServerClientAppRoleAssignments -AppId $publicClient.AppId -ApiAppId $application.AppId -AppRoles admin
-New-FhirServerSmartClientReplyUrl -AppId $publicClient.AppId -FhirServerUrl $fhirServiceUrl -ReplyUrl $growthChartUrl
-New-FhirServerSmartClientReplyUrl -AppId $publicClient.AppId -FhirServerUrl $fhirServiceUrl -ReplyUrl "${growthChartUrl}/"
-New-FhirServerSmartClientReplyUrl -AppId $publicClient.AppId -FhirServerUrl $fhirServiceUrl -ReplyUrl "${growthChartUrl}/index.html"
-New-FhirServerSmartClientReplyUrl -AppId $publicClient.AppId -FhirServerUrl $fhirServiceUrl -ReplyUrl $medicationsUrl
-New-FhirServerSmartClientReplyUrl -AppId $publicClient.AppId -FhirServerUrl $fhirServiceUrl -ReplyUrl "${medicationsUrl}/"
-New-FhirServerSmartClientReplyUrl -AppId $publicClient.AppId -FhirServerUrl $fhirServiceUrl -ReplyUrl "${medicationsUrl}/index.html"
+New-FhirServerSmartClientReplyUrl -AppId $publicClient.AppId -FhirServerUrl $fhirServiceUrl -ReplyUrl $bpChartUrl
+New-FhirServerSmartClientReplyUrl -AppId $publicClient.AppId -FhirServerUrl $fhirServiceUrl -ReplyUrl "${bpChartUrl}/"
+New-FhirServerSmartClientReplyUrl -AppId $publicClient.AppId -FhirServerUrl $fhirServiceUrl -ReplyUrl "${bpChartUrl}/index.html"
 

@@ -106,17 +106,31 @@
         },
         "fhirVersion": {
             "type": "string",
-            "allowedValues": [ "Stu3", "R4"],
+            "allowedValues": [ "Stu3", "R4" ],
             "defaultValue": "R4",
             "metadata": {
                 "description": "FHIR version. Defaults to R4"
             }
         },
-        "fhirImporterTemplateUrl": {
+        "iomtConnectorTemplateUrl": {
             "type": "string",
-            "defaultValue": "https://raw.githubusercontent.com/Microsoft/fhir-server-samples/master/deploy/templates/azuredeploy-importer.json",
+            "defaultValue": "https://raw.githubusercontent.com/Microsoft/iomt-fhir/master/deploy/templates/default-azuredeploy.json",
             "metadata": {
-                "description": "URL for FHIR importer template"
+                "description": "URL for IOMT Connector template"
+            }
+        },
+        "iomtConnectorRepositoryUrl": {
+            "type": "string",
+            "defaultValue": "https://github.com/Microsoft/iomt-fhir",
+            "metadata": {
+                "description": "URL for IOMT Connector repository"
+            }
+        },
+        "iomtConnectorRepositoryBranch": {
+            "type": "string",
+            "defaultValue": "master",
+            "metadata": {
+                "description": "Repository branch for IOMT Connector"
             }
         },
         "smartAppTemplateUrl": {
@@ -194,6 +208,17 @@
             "metadata": {
                 "description": "The type of the solution"
             }
+        },
+        "IotCentralLocation": {
+            "type": "string",
+            "allowedValues": [
+                "North Europe",
+                "Central US"
+            ],
+            "defaultValue": "Central US",
+            "metadata": {
+                "description": "The location of the IoT Central template deployment."
+            }
         }
     },
     "variables": {
@@ -202,15 +227,15 @@
         "appServicePlanName": "[concat(variables('environmentName'),'-asp')]",
         "environmentName": "[if(empty(parameters('environmentName')), concat('fhirdemo', uniqueString(resourceGroup().id)), parameters('environmentName'))]",
         "fhirServiceName": "[if(parameters('usePaaS'), variables('environmentName'), concat(variables('environmentName'),'srvr'))]",
-        "fhirImporterName": "[concat(variables('environmentName'),'imp')]",
+        "iomtConnectorName": "[concat(variables('environmentName'),'iomt')]",
+        "iotCentralName": "[concat(variables('environmentName'),'iotc')]",
         "webAppsuffix": "[if(variables('isMAG'),'.azurewebsites.us','.azurewebsites.net')]",
         "fhirServerUrlSuffix": "[if(parameters('usePaaS'),'.azurehealthcareapis.com', variables('webAppSuffix'))]",
         "fhirServiceUrl": "[concat('https://', variables('fhirServiceName'), variables('fhirServerUrlSuffix'))]",
         "fhirServiceKind": "[concat('fhir-', parameters('fhirVersion'))]",
         "aadFhirServerAudience": "[if(empty(parameters('aadFhirServerAudience')), variables('fhirServiceUrl'), parameters('aadFhirServerAudience'))]",
         "fhirDashboardJSName": "[concat(variables('environmentName'),'dash')]",
-        "growthChartName": "[concat(variables('environmentName'),'growth')]",
-        "medicationsName": "[concat(variables('environmentName'),'meds')]",
+        "bpChartName": "[concat(variables('environmentName'),'bp')]",
         "baseUri": "[deployment().properties.templateLink.uri]",
         "smartAppTemplateUrl": "[if(empty(parameters('smartAppTemplateUrl')), uri(variables('baseUri'), 'azuredeploy-smart-app.json'), parameters('smartAppTemplateUrl'))]",
         "adfTemplateUrl": "[if(empty(parameters('adfTemplateUrl')), uri(variables('baseUri'), 'azuredeploy-adf.json'), parameters('adfTemplateUrl'))]",
@@ -237,10 +262,10 @@
                     "FhirServer:Security:Authorization:Roles:0:resourcePermissions:0:actions:0": "Read",
                     "FhirServer:Security:Authorization:Roles:0:resourcePermissions:0:actions:1": "Write",
                     "FhirServer:Security:Authorization:Roles:0:resourcePermissions:0:actions:2": "HardDelete",
-                    "FhirServer:Cors:Origins:0" : "*",
-                    "FhirServer:Cors:Methods:0" : "*",
-                    "FhirServer:Cors:Headers:0" : "*",
-                    "FhirServer:Cors:MaxAge"  : "1440"
+                    "FhirServer:Cors:Origins:0": "*",
+                    "FhirServer:Cors:Methods:0": "*",
+                    "FhirServer:Cors:Headers:0": "*",
+                    "FhirServer:Cors:MaxAge": "1440"
                 }
             },
             "fhirVersion": {
@@ -285,9 +310,9 @@
                     "smartProxyEnabled": true
                 },
                 "corsConfiguration": {
-                    "origins": ["*"],
-                    "headers": ["*"],
-                    "methods": ["DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT"],
+                    "origins": [ "*" ],
+                    "headers": [ "*" ],
+                    "methods": [ "DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT" ],
                     "maxAge": 1440,
                     "allowCredentials": false
                 },
@@ -347,38 +372,47 @@
             }
         },
         {
-            "name": "[concat(variables('fhirImporterName'),'-deploy')]",
+            "name": "[concat(variables('iomtConnectorName'),'-deploy')]",
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-08-01",
+            "apiVersion": "2018-05-01",
             "properties": {
                 "templateLink": {
-                    "uri": "[parameters('fhirImporterTemplateUrl')]",
+                    "uri": "[parameters('iomtConnectorTemplateUrl')]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "appName": {
-                        "value": "[variables('fhirImporterName')]"
+                    "ServiceName": {
+                        "value": "[variables('iomtConnectorName')]"
                     },
-                    "aadAuthority": {
-                        "value": "[parameters('aadAuthority')]"
+                    "RepositoryUrl": {
+                        "value": "[parameters('iomtConnectorRepositoryUrl')]"
                     },
-                    "aadAudience": {
-                        "value": "[variables('aadFhirServerAudience')]"
+                    "RepositoryBranch": {
+                        "value": "[parameters('iomtConnectorRepositoryBranch')]"
                     },
-                    "aadServiceClientId": {
-                        "value": "[parameters('aadServiceClientId')]"
+                    "AppServicePlanSku": {
+                        "value": "[parameters('AppServicePlanSku')]"
                     },
-                    "aadServiceClientSecret": {
-                        "value": "[parameters('aadServiceClientsecret')]"
+                    "ResourceLocation": {
+                        "value": "[resourceGroup().location]"
                     },
-                    "fhirServerUrl": {
+                    "FhirServiceUrl": {
                         "value": "[variables('fhirServiceUrl')]"
                     },
-                    "repositoryUrl": {
-                        "value": "[parameters('fhirDashboardRepositoryUrl')]"
+                    "FhirServiceAuthority": {
+                        "value": "[parameters('aadAuthority')]"
                     },
-                    "repositoryBranch": {
-                        "value": "[parameters('fhirDashboardRepositoryBranch')]"
+                    "FhirServiceResource": {
+                        "value": "[variables('aadFhirServerAudience')]"
+                    },
+                    "FhirServiceClientId": {
+                        "value": "[parameters('aadServiceClientId')]"
+                    },
+                    "FhirServiceClientSecret": {
+                        "value": "[parameters('aadServiceClientsecret')]"
+                    },
+                    "ResourceIdentityServiceType": {
+                        "value": "R4DeviceAndPatientCreateIdentityService"
                     }
                 },
                 "mode": "incremental"
@@ -425,17 +459,14 @@
                         "value": "[parameters('fhirDashboardRepositoryBranch')]"
                     },
                     "growthChartAppLaunchUrl": {
-                        "value": "[concat('https://', variables('growthChartName'), variables('webAppSuffix'), '/launch.html')]"
-                    },
-                    "medicationsAppLaunchUrl": {
-                        "value": "[concat('https://', variables('medicationsName'), variables('webAppSuffix'), '/launch.html')]"
+                        "value": "[concat('https://', variables('bpChartName'), variables('webAppSuffix'), '/launch.html')]"
                     }
                 },
                 "mode": "incremental"
             }
         },
         {
-            "name": "[concat(variables('growthChartName'),'-deploy')]",
+            "name": "[concat(variables('bpChartName'),'-deploy')]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-08-01",
             "dependsOn": [
@@ -448,7 +479,7 @@
                 },
                 "parameters": {
                     "siteName": {
-                        "value": "[variables('growthChartName')]"
+                        "value": "[variables('bpChartName')]"
                     },
                     "appServicePlanName": {
                         "value": "[variables('appServicePlanName')]"
@@ -460,7 +491,7 @@
                         "value": "[parameters('smartAppClientId')]"
                     },
                     "repositoryUrl": {
-                        "value": "https://github.com/smart-on-fhir/growth-chart-app"
+                        "value": "https://github.com/smart-on-fhir/bp-centiles-app"
                     },
                     "repositoryBranch": {
                         "value": "master"
@@ -473,41 +504,17 @@
             }
         },
         {
-            "name": "[concat(variables('medicationsName'),'-deploy')]",
-            "type": "Microsoft.Resources/deployments",
-            "dependsOn": [
-                "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
-            ],
-            "apiVersion": "2019-08-01",
+            "type": "Microsoft.IoTCentral/IoTApps",
+            "name": "[variables('iotCentralName')]",
+            "location": "[parameters('IotCentralLocation')]",
+            "apiVersion": "2018-09-01",
+            "sku": {
+                "name": "S1"
+            },
             "properties": {
-                "templateLink": {
-                    "uri": "[variables('smartAppTemplateUrl')]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "siteName": {
-                        "value": "[variables('medicationsName')]"
-                    },
-                    "appServicePlanName": {
-                        "value": "[variables('appServicePlanName')]"
-                    },
-                    "appServicePlanResourceGroup": {
-                        "value": "[resourceGroup().name]"
-                    },
-                    "clientId": {
-                        "value": "[parameters('smartAppClientId')]"
-                    },
-                    "repositoryUrl": {
-                        "value": "https://github.com/smart-on-fhir/sample-apps-stu3"
-                    },
-                    "repositoryBranch": {
-                        "value": "master"
-                    },
-                    "repositoryProjectPath": {
-                        "value": "medications"
-                    }
-                },
-                "mode": "incremental"
+                "displayName": "[variables('iotCentralName')]",
+                "subdomain": "[variables('iotCentralName')]",
+                "template": "iotc-patient@1.0.0"
             }
         }
     ]

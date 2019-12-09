@@ -20,7 +20,7 @@ param
     [string]$EnvironmentName,
 
     [Parameter(Mandatory = $false)]
-    [string]$EnvironmentLocation = "westus",
+    [string]$EnvironmentLocation = "Central US",
 
     [Parameter(Mandatory = $false)]
     [string]$FhirApiLocation = "westus2",
@@ -30,6 +30,12 @@ param
 
     [Parameter(Mandatory = $false)]
     [string]$SourceRevision = "master",
+
+    [Parameter(Mandatory = $false)]
+    [string]$IomtSourceRepository = "https://github.com/Microsoft/iomt-fhir",
+
+    [Parameter(Mandatory = $false)]
+    [string]$IomtSourceRevision = "master",
 
     [Parameter(Mandatory = $false)]
     [bool]$DeploySource = $true,
@@ -127,9 +133,12 @@ if ($PersistenceProvider -eq 'sql')
 }
 
 $githubRawBaseUrl = $SourceRepository.Replace("github.com","raw.githubusercontent.com").TrimEnd('/')
-$sandboxTemplate = "${githubRawBaseUrl}/${SourceRevision}/deploy/templates/azuredeploy-sandbox.json"
+# $sandboxTemplate = "${githubRawBaseUrl}/${SourceRevision}/deploy/templates/azuredeploy-sandbox.json"
+
 $dashboardJSTemplate = "${githubRawBaseUrl}/${SourceRevision}/deploy/templates/azuredeploy-fhirdashboard-js.json"
-$importerTemplate = "${githubRawBaseUrl}/${SourceRevision}/deploy/templates/azuredeploy-importer.json"
+
+$iomtGithubRawBaseUrl = $IomtSourceRepository.Replace("github.com","raw.githubusercontent.com").TrimEnd('/')
+$iomtConnectorTemplate = "${$iomtGithubRawBaseUrl}/${SourceRevision}/deploy/templates/default-azuredeploy.json"
 
 $tenantDomain = $tenantInfo.TenantDomain
 $aadAuthority = "https://login.microsoftonline.com/${tenantDomain}"
@@ -164,16 +173,17 @@ if ([string]::IsNullOrEmpty($SqlAdminPassword))
 }
 
 # Deploy the template
-New-AzResourceGroupDeployment -TemplateUri $sandboxTemplate -environmentName $EnvironmentName -fhirApiLocation $FhirApiLocation -ResourceGroupName $EnvironmentName -fhirServerTemplateUrl $fhirServerTemplateUrl -fhirVersion $FhirVersion -sqlAdminPassword $SqlAdminPassword -aadAuthority $aadAuthority -aadDashboardClientId $confidentialClientId -aadDashboardClientSecret $confidentialClientSecret -aadServiceClientId $serviceClientId -aadServiceClientSecret $serviceClientSecret -smartAppClientId $publicClientId -fhirDashboardJSTemplateUrl $dashboardJSTemplate -fhirImporterTemplateUrl $importerTemplate -fhirDashboardRepositoryUrl $SourceRepository -fhirDashboardRepositoryBranch $SourceRevision -deployDashboardSourceCode $DeploySource -usePaaS $UsePaaS -accessPolicies $accessPolicies -deployAdf $DeployAdf
+New-AzResourceGroupDeployment -TemplateUri $sandboxTemplate -environmentName $EnvironmentName -fhirApiLocation $FhirApiLocation -ResourceGroupName $EnvironmentName -fhirServerTemplateUrl $fhirServerTemplateUrl -fhirVersion $FhirVersion -sqlAdminPassword $SqlAdminPassword -aadAuthority $aadAuthority -aadDashboardClientId $confidentialClientId -aadDashboardClientSecret $confidentialClientSecret -aadServiceClientId $serviceClientId -aadServiceClientSecret $serviceClientSecret -smartAppClientId $publicClientId -fhirDashboardJSTemplateUrl $dashboardJSTemplate -iomtConnectorTemplateUrl $iomtConnectorTemplate -iomtConnectorRepositoryUrl $IomtSourceRepository -iomtConnectorRepositoryBranch $IomtSourceRevision -fhirDashboardRepositoryUrl $SourceRepository -fhirDashboardRepositoryBranch $SourceRevision -deployDashboardSourceCode $DeploySource -usePaaS $UsePaaS -accessPolicies $accessPolicies -deployAdf $DeployAdf
 
 Write-Host "Warming up site..."
 Invoke-WebRequest -Uri "${fhirServerUrl}/metadata" | Out-Null
-$functionAppUrl = "https://${EnvironmentName}imp.azurewebsites.net"
-Invoke-WebRequest -Uri $functionAppUrl | Out-Null 
+
 
 @{
     dashboardUrl              = $dashboardJSUrl
     fhirServerUrl             = $fhirServerUrl
     dashboardUserUpn          = $dashboardUserUpn
     dashboardUserPassword     = $dashboardUserPassword
+	serviceClientId			  = $serviceClientId 
+	serviceClientSecret		  = $serviceClientSecret
 }

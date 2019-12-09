@@ -101,18 +101,11 @@
                 "description": "Deploy source code (if repo and branch are not blank)"
             }
         },
-        "growthChartAppLaunchUrl": {
+        "bpChartAppLaunchUrl": {
             "type": "string",
             "defaultValue": "",
             "metadata": {
-                "description": "Launch URL for Growth Chart SMART on FHIR App"
-            }
-        },
-        "medicationsAppLaunchUrl": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Launch URL for medications SMART on FHIR App"
+                "description": "Launch URL for Blood Pressure SMART on FHIR App"
             }
         },
         "solutionType": {
@@ -134,12 +127,8 @@
             "FhirServerUrl": "[parameters('fhirServerUrl')]",
             "SmartOnFhirApps": [
                 {
-                    "DisplayName": "Growth Chart",
-                    "LaunchUrl": "[parameters('growthChartAppLaunchUrl')]"
-                },
-                {
-                    "DisplayName": "Medications",
-                    "LaunchUrl": "[parameters('medicationsAppLaunchUrl')]"
+                    "DisplayName": "Blood Pressure Chart",
+                    "LaunchUrl": "[parameters('bpChartAppLaunchUrl')]"
                 }
             ]
         },
