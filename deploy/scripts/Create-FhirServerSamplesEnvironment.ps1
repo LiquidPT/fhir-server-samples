@@ -20,10 +20,10 @@ param
     [string]$EnvironmentName,
 
     [Parameter(Mandatory = $false)]
-    [string]$EnvironmentLocation = "Central US",
+    [string]$EnvironmentLocation = "North Central US",
 
     [Parameter(Mandatory = $false)]
-    [string]$FhirApiLocation = "westus2",
+    [string]$FhirApiLocation = "northcentralus",
 
     [Parameter(Mandatory = $false)]
     [string]$SourceRepository = "https://github.com/Microsoft/fhir-server-samples",
