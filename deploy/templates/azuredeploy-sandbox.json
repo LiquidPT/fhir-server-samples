@@ -511,6 +511,9 @@
                     "clientId": {
                         "value": "[parameters('smartAppClientId')]"
                     },
+                    "originalClientId": {
+                        "value": "bp_centiles"
+                    },
                     "repositoryUrl": {
                         "value": "https://github.com/smart-on-fhir/bp-centiles-app"
                     },
